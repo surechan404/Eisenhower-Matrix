@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eisenhower Matrix</title>
+  <style>
+    :root {
+      --border-radius: 12px;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #eef2f5;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .controls input,
+    .controls select,
+    .controls button {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: var(--border-radius);
+      border: 1px solid #ccc;
+    }
+
+    .controls input {
+      width: 250px;
+    }
+
+    .controls button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .controls button:hover {
+      background-color: #0056b3;
+    }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .quadrant {
+      background: #fff;
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      min-height: 300px;
+    }
+
+    .quadrant h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      border-bottom: 2px solid rgba(0,0,0,0.1);
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .quadrant[data-id="1"] { background-color: #ffe9c6; }
+    .quadrant[data-id="2"] { background-color: #ffcfd2; }
+    .quadrant[data-id="3"] { background-color: #c9f4e5; }
+    .quadrant[data-id="4"] { background-color: #d7d7d7; }
+
+    .task {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 12px 15px;
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    .task span {
+      flex: 1;
+      font-size: 1rem;
+    }
+
+    .task select, .task button {
+      margin-left: 8px;
+      font-size: 0.9rem;
+      border-radius: var(--border-radius);
+      border: 1px solid #ccc;
+      padding: 5px 8px;
+    }
+
+    .task button {
+      background: #ff4d4f;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .task button:hover {
+      background-color: #cc0000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Eisenhower Matrix</h1>
+  <div class="controls">
+    <input type="text" id="taskInput" placeholder="Enter a task" />
+    <select id="quadrantSelect">
+      <option value="1">Important & Urgent (1)</option>
+      <option value="2">Important & Not Urgent (2)</option>
+      <option value="3">Not Important & Urgent (3)</option>
+      <option value="4">Not Important & Not Urgent (4)</option>
+    </select>
+    <button onclick="addTask()">Add Task</button>
+  </div>
+
+  <div class="matrix">
+    <div class="quadrant" data-id="1">
+      <h2>1: Important & Urgent</h2>
+      <div class="taskList"></div>
+    </div>
+    <div class="quadrant" data-id="2">
+      <h2>2: Important & Not Urgent</h2>
+      <div class="taskList"></div>
+    </div>
+    <div class="quadrant" data-id="3">
+      <h2>3: Not Important & Urgent</h2>
+      <div class="taskList"></div>
+    </div>
+    <div class="quadrant" data-id="4">
+      <h2>4: Not Important & Not Urgent</h2>
+      <div class="taskList"></div>
+    </div>
+  </div>
+
+  <script>
+
+
+
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      const select = document.getElementById("quadrantSelect");
+      const text = input.value.trim();
+      if (text === "") return;
+
+      const quadrant = document.querySelector(`.quadrant[data-id='${select.value}'] .taskList`);
+      const taskEl = createTaskElement(text, select.value);
+      quadrant.appendChild(taskEl);
+      input.value = "";
+    }
+
+    function createTaskElement(text, quadrantValue) {
+      const task = document.createElement("div");
+      task.className = "task";
+      task.innerHTML = `
+        <span>${text}</span>
+        <div>
+          <select onchange="moveTask(this)">
+            <option value="1" ${quadrantValue === '1' ? 'selected' : ''}>1</option>
+            <option value="2" ${quadrantValue === '2' ? 'selected' : ''}>2</option>
+            <option value="3" ${quadrantValue === '3' ? 'selected' : ''}>3</option>
+            <option value="4" ${quadrantValue === '4' ? 'selected' : ''}>4</option>
+          </select>
+          <button onclick="deleteTask(this)">✖</button>
+        </div>
+      `;
+      return task;
+    }
+
+    function moveTask(select) {
+      const task = select.closest(".task");
+      const newQuadrant = select.value;
+      const quadrant = document.querySelector(`.quadrant[data-id='${newQuadrant}'] .taskList`);
+      quadrant.appendChild(task);
+      select.value = newQuadrant; // ensure UI reflects correct selection
+    }
+
+    function deleteTask(button) {
+      const task = button.closest(".task");
+      task.remove();
+    }
+
+        // Add an event listener to the window object for beforeunload
+window.addEventListener('beforeunload', function (event) {
+  // Custom message for some browsers (e.g., Chrome), but modern browsers ignore custom text
+  const confirmationMessage = 'Are you sure you want to leave? Changes you made may not be saved.';
+
+  // Display the confirmation dialog
+  event.returnValue = confirmationMessage; // Required for some browsers
+  return confirmationMessage; // For others like Chrome
+});
+  </script>
+</body>
+</html>
